@@ -54,6 +54,11 @@ aclextd:
         source: host 172.31.8.34
         destination: any
         operator: eq 23
+      - action: permit 
+        protocol: ip 
+        source: any
+        destination: any
+        operator: ""
       
 nat:
   - ntype: inside 

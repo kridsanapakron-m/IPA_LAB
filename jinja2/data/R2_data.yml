@@ -1,5 +1,6 @@
 intloopback: Loopback0
 iplo: 2.2.2.2
+ospfid: 10
 ospfrid: 2.2.2.2
 ospfnwid:
   - network: 2.2.2.2 0.0.0.0
@@ -60,7 +61,7 @@ aclextd:
         destination: any
         operator: ""
       
-nat:
+nats:
   - ntype: inside 
     aclid: 1
     int: GigabitEthernet0/3

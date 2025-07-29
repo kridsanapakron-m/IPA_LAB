@@ -16,9 +16,9 @@ exit
 {% for acl in aclstd %}
 access-list {{ acl.num }} {{ acl.action }} {{ acl.network }} {{ acl.wildcard }}
 {% endfor %}
-
-ip nat {{ nat.ntype}} source list {{ nat.aclid}} interface {{ nat.int}} vrf {{ nat.vrf }} overload
-
+{% for nat in nats %}
+ip nat {{ nat.ntype }} source list {{ nat.aclid }} interface {{ nat.int }} vrf {{ nat.vrf }} overload
+{% endfor %}
 {% for aclex in aclextd %}
 ip access-list extended {{ aclex.aclname }}
 {% for acl in aclex.acllist %}

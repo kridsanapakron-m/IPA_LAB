@@ -1,0 +1,30 @@
+interface {{ intloopback }}
+ip address {{ iplo }} 255.255.255.255
+router ospf {{ ospfid }} vrf Control-Data
+router-id {{ ospfrid }}
+{% for networks in ospfnwid %}
+network {{ networks.network }} area {{ networks.area }} 
+{% endfor %}
+default-information originate
+{% for port in ports %}
+interface {{ port.ptype }}{{ port.pnum }}
+{% for command in port.commands %}
+{{ command.cm }}
+{% endfor %}
+exit
+{% endfor %}
+{% for acl in aclstd %}
+access-list {{ acl.num }} {{ acl.action }} {{ acl.network }} {{ acl.wildcard }}
+{% endfor %}
+
+ip nat {{ nat.ntype}} source list {{ nat.aclid}} interface {{ nat.int}} vrf {{ nat.vrf }} overload
+
+{% for aclex in aclextd %}
+ip access-list extended {{ aclex.aclname }}
+{% for acl in aclex.acllist %}
+{{ acl.action }} {{ acl.protocol }} {{ acl.source }} {{ acl.destination }} {{ acl.operator }} 
+{% endfor %}
+interface {{ aclex.port }}
+ip access-group {{ aclex.aclname }} {{ aclex.direction }}
+exit
+{% endfor %}

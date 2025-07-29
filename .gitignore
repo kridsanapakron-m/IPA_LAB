@@ -1,3 +1,5 @@
 *.env
 *user
 *user.pub
+*R2.txt
+*test.py

@@ -1,0 +1,10 @@
+intloopback: Loopback0
+iplo: 1.1.1.1
+ospfrid: 1.1.1.1
+ospfnwid:
+  - network: 1.1.1.1 0.0.0.0
+    area: 0
+  - network: 172.31.8.16 0.0.0.15
+    area: 0
+  - network: 172.31.8.48 0.0.0.15
+    area: 0

@@ -1,0 +1,62 @@
+intloopback: Loopback0
+iplo: 2.2.2.2
+ospfrid: 2.2.2.2
+ospfnwid:
+  - network: 2.2.2.2 0.0.0.0
+    area: 0
+  - network: 172.31.8.16 0.0.0.15
+    area: 0
+  - network: 172.31.8.32 0.0.0.15
+    area: 0
+ports:
+  - ptype: GigabitEthernet
+    pnum: 0/1
+    commands:
+      - cm: vrf forwarding Control-Data
+      - cm: ip nat inside
+  - ptype: GigabitEthernet
+    pnum: 0/2
+    commands:
+      - cm: vrf forwarding Control-Data
+      - cm: ip nat inside
+  - ptype: GigabitEthernet
+    pnum: 0/3
+    commands:
+      - cm: vrf forwarding Control-Data
+      - cm: ip add dhcp
+      - cm: ip nat outside
+      - cm: no shut
+aclstd:
+  - num: 1
+    action: permit
+    network: 172.31.8.16
+    wildcard: 0.0.0.15
+  - num: 1
+    action: permit
+    network: 172.31.8.32
+    wildcard: 0.0.0.15
+  - num: 1
+    action: permit
+    network: 172.31.8.48
+    wildcard: 0.0.0.15
+aclextd:
+  - aclname: B_telnet_ssh
+    direction: in
+    port: GigabitEthernet0/1
+    acllist:
+      - action: deny 
+        protocol: tcp 
+        source: host 172.31.8.34
+        destination: any
+        operator: eq 22
+      - action: deny 
+        protocol: tcp 
+        source: host 172.31.8.34
+        destination: any
+        operator: eq 23
+      
+nat:
+  - ntype: inside 
+    aclid: 1
+    int: GigabitEthernet0/3
+    vrf: Control-Data

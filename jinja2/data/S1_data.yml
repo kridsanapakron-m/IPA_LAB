@@ -1,0 +1,7 @@
+vlan: 101
+name: Control-Data
+ports:
+  - ptype: GigabitEthernet
+    pnum: 0/1
+  - ptype: GigabitEthernet
+    pnum: 0/2

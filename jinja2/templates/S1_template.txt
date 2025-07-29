@@ -1,0 +1,9 @@
+vlan {{ vlan }}
+name {{ name }}
+exit
+{% for port in ports %}
+interface {{ port.ptype }}{{ port.pnum }}
+switchport mode access
+switchport access vlan {{ vlan }}
+exit
+{% endfor %}

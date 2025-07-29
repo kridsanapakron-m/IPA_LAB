@@ -1,0 +1,8 @@
+interface {{ intloopback }}
+    ip address {{ iplo }} 255.255.255.255
+router ospf {{ ospfid }} vrf Control-Data
+    router-id {{ ospfrid }}
+    {% for networks in ospfnwid %}
+    network {{ networks.network }} area {{ networks.area }} 
+    {% endfor %}
+    

@@ -28,7 +28,7 @@ def main():
     privatekey = os.getenv("file_privatekey")
     template_dir = os.getenv("jinja2_template")
     data_dir = os.getenv("jinja2_data")
-    devices = ["R2"]
+    devices = ["S1", "R1", "R2"]
     env = Environment(loader=FileSystemLoader(template_dir),trim_blocks=True,lstrip_blocks=True)
     for i in devices:
         ip = os.getenv(f"{i}_ip")

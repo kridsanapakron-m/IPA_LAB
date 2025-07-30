@@ -1,0 +1,4 @@
+interface {{ inttype }}{{ intnum }}
+description Connect to {{ neighborporttype }}{{ neighborport }}{% if neighborname %} of {{ neighborname }}
+{% endif %}
+exit

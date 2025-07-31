@@ -1,9 +1,14 @@
+from operator import ne
 import os
 import re
 from dotenv import load_dotenv
 from netmiko import ConnectHandler
 from jinja2 import Environment, FileSystemLoader
-import yaml
+load_dotenv()
+username = os.getenv("ssh_username")
+privatekey = os.getenv("file_privatekey")
+template_dir = os.getenv("jinja2_template")
+env = Environment(loader=FileSystemLoader(template_dir),trim_blocks=True,lstrip_blocks=True)
 def lab_netmiko(ip, username, privatekey, commands):
     device_params = {
         "device_type": "cisco_ios",
@@ -22,7 +27,7 @@ def lab_netmiko(ip, username, privatekey, commands):
                 return output
     except Exception as e:
         return print("command error")
-def createcommand(inttype, intnum, neighborporttype, neighborport, neighborname, env):
+def createcommand(inttype, intnum, neighborporttype, neighborport, neighborname, ):
     data = {
                     "inttype": inttype,
                     "intnum": intnum,
@@ -33,29 +38,45 @@ def createcommand(inttype, intnum, neighborporttype, neighborport, neighborname,
     template = env.get_template('Description.txt')
     commands = template.render(data).split("\n")
     return commands
-def main():
-    load_dotenv()
-    username = os.getenv("ssh_username")
-    privatekey = os.getenv("file_privatekey")
-    template_dir = os.getenv("jinja2_template")
-    devices = ["R0","R1", "R2", "S0", "S1"]
-    env = Environment(loader=FileSystemLoader(template_dir),trim_blocks=True,lstrip_blocks=True)
-    for i in devices:
-        ip = os.getenv(f"{i}_ip")
-        commands = "do sh cdp neighbor"
-        output = lab_netmiko(ip, username, privatekey, commands)
-        pattern = "^(\\S+)\\s+(Gig)\\s+(\\S+)\\s+((?:\\d+\\s+)+[A-Z\\s]+)\\s+(Gig)\\s+(\\S+)"
-        for j in output.split("\n"):
+def getneighbor(ip):
+    commands = "do sh cdp neighbor"
+    output = lab_netmiko(ip, username, privatekey, commands)
+    return output
+def createcommandfromneighbor(ip):
+    neighbor = getneighbor(ip)
+    pattern = "^(\\S+)\\s+(Gig)\\s+(\\S+)\\s+((?:\\d+\\s+)+[A-Z\\s]+)\\s+(Gig)\\s+(\\S+)"
+    list_command = []
+    for j in neighbor.split("\n"):
             match = re.search(pattern, j.strip())
             if match:
                 iii = match.groups()
-                commands = createcommand(iii[1], iii[2], iii[4][0], iii[5], iii[0].split('.')[0], env)
-        if i == "R0":
-            commands = createcommand("Gig", "0/1", "", "WAN", "", env)
-        elif i == "R1":
-            commands = createcommand("Gig", "0/2", "", "Pc", "", env)
-        elif i == "R2":
-            commands = createcommand("Gig", "0/3", "", "WAN", "", env)     
-        elif i == "S1":
-            commands = createcommand("Gig", "0/2", "", "Pc", "", env)   
+                commands = createcommand(iii[1], iii[2], iii[4][0], iii[5], iii[0].split('.')[0])
+                list_command.extend(commands)
+    return list_command
+def createcommandblindport(devices):
+    if devices == "R0":
+        commands = createcommand("Gig", "0/1", "WAN\n", "", "")
+        return commands
+    elif devices == "R1":
+        commands = createcommand("Gig", "0/2", "Pc\n", "", "")
+        return commands
+    elif devices == "R2":
+        commands = createcommand("Gig", "0/3", "WAN\n", "", "") 
+        return commands  
+    elif devices == "S1":
+        commands = createcommand("Gig", "0/2", "Pc\n", "", "")  
+        return commands
+    return []
+def main():
+    devices = ["R0","R1", "R2", "S0", "S1"]
+    for i in devices:
+        full_command = []
+        ip = os.getenv(f"{i}_ip")
+        #full_command.extend(createcommandfromneighbor(ip))
+        full_command.extend(createcommandblindport(i))
+        print(f"Commands for {i} ({ip}):")
+        print(full_command)
+        print(f"-----------------------\n")
+        # output = lab_netmiko(ip, username, privatekey, full_command)
+        # print(output)
 main()

@@ -1,33 +1,19 @@
-import os
-from dotenv import load_dotenv
-from netmiko import ConnectHandler
-def lab_netmiko(ip, username, privatekey, commands):
-    device_params = {
-        "device_type": "cisco_ios",
-        "host": ip,
-        "username": username,
-        "use_keys": True,
-        "key_file": privatekey,
-        "allow_agent": False,
-        "disabled_algorithms": {
-            "pubkeys": ["rsa-sha2-256", "rsa-sha2-512"]
-        }
-    }
-    try:
-        with ConnectHandler(**device_params) as ssh:
-                output = ssh.send_config_set(commands)
-                print(output)
-    except Exception as e:
-        return print("command error")
-
-def main():
-    load_dotenv()
-    username = os.getenv("ssh_username")
-    privatekey = "./user"
-    devices = ["S1", "R1", "R2"]
-
-    # for i in devices:
-    #     ip = os.getenv(f"{i}_ip")
-    #     commands = os.getenv(f"{i}_command").split(", ")
-    #     lab_netmiko(ip, username, privatekey, commands)
-main()
+import pytest
+from textfsmlab import *   
+@pytest.mark.neighbor
+def test_createcommandfromneighbor():
+    assert createcommandfromneighbor("172.31.8.1") == ['interface Gig0/0', 'description Connect to G0/0 of S0', 'exit']
+    assert createcommandfromneighbor("172.31.8.2") == ['interface Gig0/2', 'description Connect to G0/0 of R2', 'exit', 'interface Gig0/1', 'description Connect to G0/0 of R1', 'exit', 'interface Gig0/3', 'description Connect to G0/0 of S1', 'exit', 'interface Gig0/0', 'description Connect to G0/0 of R0', 'exit']
+    assert createcommandfromneighbor("172.31.8.3") == ['interface Gig0/1', 'description Connect to G0/1 of R2', 'exit', 'interface Gig0/0', 'description Connect to G0/3 of S0', 'exit']
+    assert createcommandfromneighbor("172.31.8.4") == ['interface Gig0/1', 'description Connect to G0/2 of R2', 'exit', 'interface Gig0/0', 'description Connect to G0/1 of S0', 'exit']
+    assert createcommandfromneighbor("172.31.8.5") == ['interface Gig0/0', 'description Connect to G0/2 of S0', 'exit', 'interface Gig0/2', 'description Connect to G0/1 of R1', 'exit', 'interface Gig0/1', 'description Connect to G0/1 of S1', 'exit']
+@pytest.mark.blindport
+def test_createcommandblindport():
+    assert createcommandblindport("R0") == ['interface Gig0/1', 'description Connect to WAN', 'exit']
+    assert createcommandblindport("R1") == ['interface Gig0/2', 'description Connect to Pc', 'exit']
+    assert createcommandblindport("R2") == ['interface Gig0/3', 'description Connect to WAN', 'exit']
+    assert createcommandblindport("S1") == ['interface Gig0/2', 'description Connect to Pc', 'exit']
+    assert createcommandblindport("S0") == []
+if __name__ == "__main__":
+    test_createcommandfromneighbor()
+    test_createcommandblindport()

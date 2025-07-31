@@ -72,11 +72,7 @@ def main():
     for i in devices:
         full_command = []
         ip = os.getenv(f"{i}_ip")
-        #full_command.extend(createcommandfromneighbor(ip))
+        full_command.extend(createcommandfromneighbor(ip))
         full_command.extend(createcommandblindport(i))
-        print(f"Commands for {i} ({ip}):")
-        print(full_command)
-        print(f"-----------------------\n")
-        # output = lab_netmiko(ip, username, privatekey, full_command)
-        # print(output)
+        lab_netmiko(ip, username, privatekey, full_command)
 main()
